@@ -1,0 +1,11 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#222"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="style.css"><title>Ma Collection Louis de Funès</title></head><body>
+<header><h1>Ma Collection Louis de Funès</h1><input id="q" placeholder="Rechercher un objet, film, catégorie…"></header>
+<div class="stats" id="stats"></div><main class="grid" id="grid"></main><dialog id="dlg"></dialog>
+<script src="data.js"></script><script>
+const data=window.COLLECTION, grid=document.querySelector('#grid'), q=document.querySelector('#q'), dlg=document.querySelector('#dlg');
+function esc(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function render(list){document.querySelector('#stats').textContent=list.length+' objet(s)';grid.innerHTML=list.map(x=>`<article class=card data-id="${x.id}">${x.images[0]?`<img loading=lazy src="${x.images[0]}">`:`<div class=ph>🎬</div>`}<div class=txt><div class=title>${esc(x.title)}</div><div class=meta>${esc(x.inventory_number)} · ${esc(x.category||'Sans catégorie')}</div></div></article>`).join('');}
+q.oninput=()=>{let s=q.value.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');render(data.filter(x=>JSON.stringify(x).toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').includes(s)))}
+grid.onclick=e=>{let c=e.target.closest('.card');if(!c)return;let x=data.find(v=>v.id==c.dataset.id);dlg.innerHTML=`${x.images[0]?`<img src="${x.images[0]}">`:''}<div class=detail><button class=close onclick="dlg.close()">×</button><h2>${esc(x.title)}</h2><p><b>N° inventaire :</b> ${esc(x.inventory_number)}<br><b>Catégorie :</b> ${esc(x.category||'—')}<br><b>Film :</b> ${esc((x.films||[]).join(', ')||'—')}<br><b>Année :</b> ${esc(x.year||'—')}<br><b>Pays :</b> ${esc(x.country||'—')}<br><b>État :</b> ${esc(x.condition||'—')}<br><b>Emplacement :</b> ${esc(x.location||'—')}</p>${x.description?`<p>${esc(x.description)}</p>`:''}</div>`;dlg.showModal()}
+render(data); if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script></body></html>
